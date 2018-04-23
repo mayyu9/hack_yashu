@@ -1,39 +1,115 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './App.css';
-import ReactForm from './ReactForm';
+import { Form, Text, Radio, RadioGroup } from 'react-form';
+import { keyGenerator, saveBlockData } from './EncryptionUtil';
 
-const PrevHash = (props) => {
-  return(
-    <form>
-      <label>
-        Previous Hash:
-        <input type="text" name="name"  value={props.prevhash} />
-      </label>
-      <input type="submit" value="Submit" />
-  </form>
-  );
-}
-class App extends Component {
+import PatientData from './PatientData';
+
+class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       prevHash: 0,
+      patientData: [],
     }
+    this.OnChange = this.OnChange.bind(this);
   }
+
+  OnChange (event){
+    this.setState({ prevHash: event.target.value });
+  }
+
   render() {
     return (
       <div className="App">
-        <h1>Patient Registration Form</h1>
+        <h1>Patient Form</h1>
         <div className='previous'>
-        <PrevHash prevhash = { this.state.prevHash } />
+          <label> Previous Hash:   </label>
+            <input type="text" name="preHash"  value={this.state.prevHash} onChange={this.OnChange}/>
         </div>
+
         <hr />
+
         <div className='form'>
-        <ReactForm prevhash = { this.state.prevHash } />
+          <Form onSubmit = {
+            (submittedValues) => {
+                const data = Object.assign({});
+                data.prevHash = this.state.prevHash;
+                data.patientData = submittedValues;
+                const timeStamp = Date.now();
+                data.timeStamp = timeStamp;
+                const currentHash = keyGenerator(data);
+                data.hash = currentHash;
+                const saveResponse = saveBlockData(data);
+                 if(saveResponse) {
+                  const patData = this.state.patientData;
+                  patData.push(data);
+                  this.setState({ patientData: patData, prevHash: currentHash });
+                 }
+           }
+            }>
+              {formApi => (
+                <form onSubmit={formApi.submitForm} id="form2">
+                  <label htmlFor="firstName">Name</label>
+                    <Text field="name" id="name"/>
+                  <RadioGroup field="gender">
+                    <label htmlFor="male" className="mr-2">Male</label>
+                    <Radio value="male" id="male" className="mr-3 d-inline-block" />
+                    <label htmlFor="female" className="mr-2">Female</label>
+                    <Radio value="female" id="female" className="d-inline-block" />
+                  </RadioGroup>
+                  <label htmlFor="FIN">FIN</label>
+                    <Text field="fin" id="fin" />
+                  <br/ >
+                  <label htmlFor="BILL">Bill Amount</label>
+                    <Text field="bill" id="bill" />
+                  <br />
+                  <button type="submit" className="mb-4 btn btn-primary">
+                    Submit
+                  </button>
+                </form>
+              )}
+            </Form>
         </div>
+
+      <div className='previous'>
+        <label> Block Information </label>
+            <br />
+         { this.state.patientData.map((patientData) => {
+            return (
+              <PatientData
+                patData= { patientData }
+                hash = {this.state.prevHash}
+              />
+            )
+          })
+         }
       </div>
+
+    </div>
     );
   }
 }
+
+//
+// {
+//     timeIntervals.map((interval, key) => {
+//       const keyValue = key;
+//       return (
+//         <TimeIntervals
+//           key={keyValue}
+//           keyIndex={key}
+//           timeIntervalsObject={interval}
+//           timeIntervalLength={timeIntervals.length - 1}
+//           attendanceType={attendanceType}
+//           addOrRemoveTimeInterval={addOrRemoveTimeInterval}
+//           updateTimeInterval={updateTimeInterval}
+//           groupDetails={groupDetails}
+//           intl={intl}
+//         />
+//       );
+//     },
+//   )
+// }
 
 export default App;
