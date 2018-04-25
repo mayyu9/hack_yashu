@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import { Form, Text, Radio, RadioGroup } from 'react-form';
-import { keyGenerator, saveBlockData } from './EncryptionUtil';
+import { keyGenerator, saveBlockData, loadBlockData } from './EncryptionUtil';
 
 import PatientData from './PatientData';
 
@@ -31,7 +31,14 @@ class App extends React.Component {
         <hr />
 
         <div className='form'>
-          <Form onSubmit = {
+          <Form onLoad = { () => {
+            const loadData = loadBlockData();
+            if(loadData > 0){
+              const patData = this.state.patientData;
+              patData.push(loadData);
+            }
+          }}
+          onSubmit = {
             (submittedValues) => {
                 const data = Object.assign({});
                 data.prevHash = this.state.prevHash;
@@ -90,26 +97,5 @@ class App extends React.Component {
     );
   }
 }
-
-//
-// {
-//     timeIntervals.map((interval, key) => {
-//       const keyValue = key;
-//       return (
-//         <TimeIntervals
-//           key={keyValue}
-//           keyIndex={key}
-//           timeIntervalsObject={interval}
-//           timeIntervalLength={timeIntervals.length - 1}
-//           attendanceType={attendanceType}
-//           addOrRemoveTimeInterval={addOrRemoveTimeInterval}
-//           updateTimeInterval={updateTimeInterval}
-//           groupDetails={groupDetails}
-//           intl={intl}
-//         />
-//       );
-//     },
-//   )
-// }
 
 export default App;

@@ -15,23 +15,49 @@ export function keyGenerator(data) {
   return encryptedKey;
 }
 
+// export function saveBlockData(data) {
+//   return blockMapService(data).then(response => {
+//     response
+//   }).catch(error => {
+//     throw(error);
+//   });
+// }
+//
+// export function blockMapService(data) {
+// return new Promise((resolve, reject) => {
+//   setTimeout(() => {
+//     axios.get('http://10.171.228.49:8080/BlockManager/rest/BlockManager/retrieve')
+//     .then(function(response){
+//       return response.data
+//     })
+//     resolve();
+//   }, 0);
+// });
+// }
+
 export function saveBlockData(data) {
   debugger;
-  return blockMapService(data).then(response => {
-    response
-  }).catch(error => {
-    throw(error);
-  });
+  return new Promise((resolve, reject) => {
+  axios.post('http://10.171.228.49:8080/BlockManager/rest/BlockManager/create',
+    {data: JSON.stringify(data)},
+    {
+      headers: {
+        Accept: 'application/json',
+      },
+    },
+  )
+  .then(response => {
+    resolve(response.data)
+  })
+})
 }
 
-export function blockMapService(data) {
-return new Promise((resolve, reject) => {
-  setTimeout(() => {
-    axios.get('http://10.171.228.49:8080/BlockManager/rest/BlockManager/block')
-    .then(function(response){
-      return response.data
-    })
-    resolve();
-  }, 100);
-});
+export function loadBlockData(data) {
+  debugger;
+  return new Promise((resolve, reject) => {
+  axios.get('http://10.171.228.49:8080/BlockManager/rest/BlockManager/retrieve')
+  .then(response => {
+    resolve(response.data)
+  })
+})
 }
